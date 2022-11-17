@@ -2,7 +2,7 @@ library(data.table)
 library(DBI)
 require(feather)
 #dump data
-system(command = "rsync -abviuzP pi@192.168.0.139:~/domoticz/domoticz.db /home/dsl/Dokumenty/R/mqtt/gitpages/")
+system(command = "rsync -abviuzP pi@192.168.0.139:~/domoticz/domoticz.db /home/dsl/Dokumenty/R/mqtt/chrust_plus/")
 # Create an ephemeral in-memory RSQLite database
 #con <- dbConnect(RSQLite::SQLite(), "/home/dsl/Dokumenty/R/mqtt/domoticz.db")
 con <- dbConnect(RSQLite::SQLite(), "domoticz.db")
