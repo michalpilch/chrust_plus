@@ -38,6 +38,13 @@ plotly::ggplotly(p)
 plotly::ggplotly(qp)
 ```
 
+### Temperatury
+
+```{r}
+plotly::ggplotly(plot_temp)
+```
+
+
 Column {data-width=350 .tabset}
 -----------------------------------------------------------------------
 

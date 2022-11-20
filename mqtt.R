@@ -7,7 +7,7 @@ library(data.table)
 #dump data
 
 #df <- feather::read_feather(path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
-df <- feather::read_feather(path = "mqtt_mpm.feather")
+df <- feather::read_feather(path = "~/Dokumenty/R/mqtt/chrust_plus/mqtt_mpm.feather")
 #df[-c(35357,35377,35376,35378),] -> df
 
 library(tidyr)
@@ -30,13 +30,14 @@ colnames(df) <- c("chill", "rh", "pressure", "dew", "setpoint",
                   "date", "temp_home" , "temp", "temp_rel", "temp_piec",  "temp_co",
                   "bufor_top", "bufor_mid1", "bufor_mid2", "bufor_bottom", "temp2")
 df$date <- as.POSIXct(df$date)
+
 df <- df %>% filter(date > "2022-10-14 16:50") %>% filter(date > (Sys.Date()-2))
 df$temp=ifelse(df$date < "2022-11-05 13:00", df$temp, df$temp2)
 
 df$WABT <- (2*df$bufor_top + df$bufor_bottom)/3
 #dt$WABT <- (1*dt$bufor_mid1 )
 
-df$delta_WABT <- df$WABT-35
+df$delta_WABT <- df$WABT-df$temp_co
 df$Q_buf <- 600 * 4 * df$delta_WABT / 3412
 
 df %>% group_by(date = floor_date(date, unit="5 mins")) %>%
@@ -89,21 +90,37 @@ dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 # summary(aov)
 # TukeyHSD(aov)
 
-krzywe<-ggplot(dt, aes(x=temp,y=temp_co, color=deltaT/7.6)) + 
+krzywe<- dt %>% filter(temp_co > 0 & temp > -50 ) %>% 
+  ggplot(., aes(x=temp,y=temp_co, color=deltaT/7.6)) + 
   geom_point() + scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
 #plotly::ggplotly(krzywe)
+#
 
-
-plot_buffer <-  dt %>% filter(bufor_mid2 > 20) %>% 
+plot_temp <-  
+  dt %>% filter(temp > -50 & temp_home > -50 & temp_co > 20) %>%
+  select(date,temp,temp_co,temp_home) %>% 
+  reshape2::melt(id.vars=c("date"))  %>% 
   ggplot(., aes(x=date)) + 
-  geom_point(aes(y=bufor_top), color="red", size=2) +
-  geom_point(aes(y=bufor_mid1), color="orange", size=2) +
-  geom_point(aes(y=bufor_mid2), color="green", size=2) +
-  geom_point(aes(y=bufor_bottom), color="blue", size=2) +
+  geom_point(aes(y=value, color=variable), size=1)+
+  scale_color_viridis_d() +
   scale_x_datetime(breaks = "4 hours", date_labels = "%F %H:%m") + 
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
-#plotly::ggplotly(plot_buffer)
+#plotly::ggplotly(plot_temp)
+
+
+
+plot_buffer <-  
+  dt %>% filter(bufor_mid2 > 20 & bufor_top > 20 & bufor_mid1 > 20 &
+                                bufor_bottom > 20) %>%
+  select(date,bufor_top,bufor_mid1,bufor_mid2,bufor_bottom) %>% 
+ reshape2::melt(id.vars=c("date"))  %>% 
+  ggplot(., aes(x=date)) + 
+  geom_point(aes(y=value, color=variable), size=2)+
+  scale_color_viridis_d() +
+  scale_x_datetime(breaks = "4 hours", date_labels = "%F %H:%m") + 
+  theme(axis.text.x = element_text(angle = 70, hjust = 1))
+plotly::ggplotly(plot_buffer)
 
 
 

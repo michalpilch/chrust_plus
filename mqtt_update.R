@@ -11,11 +11,11 @@ con <- dbConnect(RSQLite::SQLite(), "domoticz.db")
 dbReadTable(con, "Temperature") -> df1
 # ## load older data !!! max 7 days old
 #df2 <- feather::read_feather(path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
-df2 <- feather::read_feather(path = "mqtt_mpm.feather")
+df2 <- feather::read_feather(path = "~/Dokumenty/R/mqtt/chrust_plus/mqtt_mpm.feather")
 # 
 df <- unique(rbindlist(list(df1,df2)))
 #feather::write_feather(df, path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
-feather::write_feather(df, path = "mqtt_mpm.feather")
+feather::write_feather(df, path = "~/Dokumenty/R/mqtt/chrust_plus/mqtt_mpm.feather")
 
 
 
