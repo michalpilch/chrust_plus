@@ -105,8 +105,9 @@ plot_temp <-
   geom_point(aes(y=value, color=variable), size=1)+
   scale_color_viridis_d() +
   scale_x_datetime(breaks = "4 hours", date_labels = "%F %H:%m") + 
-  theme(axis.text.x = element_text(angle = 70, hjust = 1))
-#plotly::ggplotly(plot_temp)
+  theme(axis.text.x = element_text(angle = 70, hjust = 1)) +
+  facet_grid(variable~., scales = "free_y")
+plotly::ggplotly(plot_temp)
 
 
 
