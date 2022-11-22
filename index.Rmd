@@ -19,11 +19,12 @@ output:
 library(flexdashboard)
 source("mqtt_update.R")
 source("mqtt.R")
+library("plotly")
 # Install thematic and un-comment for themed static plots (i.e., ggplot2)
 # thematic::thematic_rmd()
 ```
 
-Column {data-width=650 .tabset}
+Column {data-width=600 .tabset}
 -----------------------------------------------------------------------
 
 ### Ładowanie bufora
@@ -41,11 +42,13 @@ plotly::ggplotly(qp)
 ### Temperatury
 
 ```{r}
-plotly::ggplotly(plot_temp)
+ggplotly(plot_temp, dynamicTicks = TRUE) %>%
+ # rangeslider() %>%
+  layout(legend = list(orientation = 'h'))
 ```
 
 
-Column {data-width=350 .tabset}
+Column {data-width=400 .tabset}
 -----------------------------------------------------------------------
 
 ### Krzywa grzewcza
@@ -58,7 +61,9 @@ plotly::ggplotly(krzywe)
 ### Profil temperatur bufora
 
 ```{r}
-plotly::ggplotly(plot_buffer)
+ggplotly(plot_buffer, dynamicTicks = TRUE) %>%
+ # rangeslider() %>%
+  layout(legend = list(orientation = 'h'))
 
 ```
 

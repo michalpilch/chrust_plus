@@ -105,7 +105,7 @@ plot_temp <-
   geom_point(aes(y=value, color=variable), size=1)+
   scale_color_viridis_d() +
   scale_x_datetime(breaks = "4 hours", date_labels = "%F %H:%m") + 
-  theme(axis.text.x = element_text(angle = 70, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1),legend.position = "top") +
   facet_grid(variable~., scales = "free_y")
 plotly::ggplotly(plot_temp)
 
@@ -113,16 +113,18 @@ plotly::ggplotly(plot_temp)
 
 plot_buffer <-  
   dt %>% filter(bufor_mid2 > 20 & bufor_top > 20 & bufor_mid1 > 20 &
-                                bufor_bottom > 20) %>%
+                                bufor_bottom > 20) %>% 
+  filter(date > (Sys.Date()-1)) %>%
   select(date,bufor_top,bufor_mid1,bufor_mid2,bufor_bottom) %>% 
  reshape2::melt(id.vars=c("date"))  %>% 
   ggplot(., aes(x=date)) + 
   geom_point(aes(y=value, color=variable), size=2)+
   scale_color_viridis_d() +
   scale_x_datetime(breaks = "4 hours", date_labels = "%F %H:%m") + 
-  theme(axis.text.x = element_text(angle = 70, hjust = 1))
-plotly::ggplotly(plot_buffer)
-
+  theme(axis.text.x = element_text(angle = 70, hjust = 1),legend.position = "top")
+# ggplotly(plot_buffer, dynamicTicks = TRUE) %>%
+#   rangeslider() %>%
+#   layout(legend = list(orientation = 'h'))
 
 
 
