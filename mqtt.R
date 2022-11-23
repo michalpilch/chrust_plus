@@ -34,10 +34,11 @@ df$date <- as.POSIXct(df$date)
 df <- df %>% filter(date > "2022-10-14 16:50") %>% filter(date > (Sys.Date()-2))
 df$temp=ifelse(df$date < "2022-11-05 13:00", df$temp, df$temp2)
 
-df$WABT <- (2*df$bufor_top + df$bufor_bottom)/3
+df$WABT <- (df$bufor_top + df$bufor_bottom)/2
 #dt$WABT <- (1*dt$bufor_mid1 )
 
-df$delta_WABT <- df$WABT-df$temp_co
+#df$delta_WABT <- df$WABT-df$temp_co
+df$delta_WABT <- df$WABT-35
 df$Q_buf <- 600 * 4 * df$delta_WABT / 3412
 
 df %>% group_by(date = floor_date(date, unit="5 mins")) %>%
