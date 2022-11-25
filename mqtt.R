@@ -37,8 +37,8 @@ df$temp=ifelse(df$date < "2022-11-05 13:00", df$temp, df$temp2)
 df$WABT <- (df$bufor_top + df$bufor_bottom)/2
 #dt$WABT <- (1*dt$bufor_mid1 )
 
-#df$delta_WABT <- df$WABT-df$temp_co
-df$delta_WABT <- df$WABT-35
+df$delta_WABT <- df$WABT-df$temp_co
+#df$delta_WABT <- df$WABT-35
 df$Q_buf <- 600 * 4 * df$delta_WABT / 3412
 
 df %>% group_by(date = floor_date(date, unit="5 mins")) %>%
@@ -67,23 +67,23 @@ dt$temp_co_delta <- c(NA,diff(dt$temp_co))
 dt$temp_home_delta <- c(NA,diff(dt$temp_home))
 dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 
-
-# p3<-dt %>%  filter(Q_buf_delta <0) %>% 
+# 
+# p3<-dt %>%  filter(Q_buf_delta <0) %>%
 #   ggplot(., aes(x=date)) +
-#     geom_point(aes(y=deltaT/7.6, color=deltaT/7.6)) + 
-#   geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) + 
+#     geom_point(aes(y=deltaT/7.6/12, color=deltaT/7.6)) +
+#   geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
 #   scale_color_viridis_c() +
 #   theme(axis.text.x = element_text(angle = 70, hjust = 1))
 # plotly::ggplotly(p3)
-
-##check
-##sprawdzene AOV czy delta bufora = deltaT/5.6
-##
-##
+# 
+# ##check
+# ##sprawdzene AOV czy delta bufora = deltaT/5.6
+# ##
+# ##
 # library(tidyr)
-# data_long <- dt %>% filter(Q_buf_delta <0) %>% 
-#   mutate(q=deltaT/7.6, Q_buf_delta = abs(Q_buf_delta)) %>%
-#   select(Q_buf_delta,q) %>% 
+# data_long <- dt %>% filter(Q_buf_delta <0) %>%
+#   mutate(q=deltaT/7.6/12, Q_buf_delta = abs(Q_buf_delta)) %>%
+#   select(Q_buf_delta,q) %>%
 #   gather(condition, measurement, Q_buf_delta:q, factor_key=TRUE)
 # 
 # aov <- aov(measurement ~ condition, data = data_long)
@@ -154,10 +154,10 @@ dt %>% group_by(date = floor_date(date, unit="60 mins")) %>%
             bufor_bottom=mean(bufor_bottom,na.rm=T),
             Q_buf=mean(bufor_bottom,na.rm=T)) -> dth
 
-dth$WABT <- (2*dth$bufor_top + dth$bufor_bottom)/3
+dth$WABT <- (dth$bufor_top + dth$bufor_bottom)/2
 #dt$WABT <- (1*dt$bufor_mid1 )
 
-dth$delta_WABT <- dth$WABT-35
+dth$delta_WABT <- dth$WABT-dth$temp_co
 dth$Q_buf <- 600 * 4 * dth$delta_WABT / 3412
 dth$Q_buf_delta <- c(NA,diff(dth$Q_buf))
 
