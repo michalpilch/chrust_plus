@@ -100,7 +100,7 @@ krzywe<- dt %>% filter(temp_co > 0 & temp > -50 ) %>%
 
 plot_temp <-  
   dt %>% filter(temp > -50 & temp_home > -50 & temp_co > 20) %>%
-  select(date,temp,temp_co,temp_home) %>% 
+  select(date,temp,temp_co,temp_home, temp_piec) %>% 
   reshape2::melt(id.vars=c("date"))  %>% 
   ggplot(., aes(x=date)) + 
   geom_point(aes(y=value, color=variable), size=1)+
