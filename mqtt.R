@@ -13,6 +13,7 @@ df <- feather::read_feather(path = "~/Dokumenty/R/mqtt/chrust_plus/mqtt_mpm.feat
 library(tidyr)
 df %>% unique() -> df
 df$Date <- as.POSIXct(df$Date)
+df$Temperature <- ifelse(df$Temperature == -127, NA, df$Temperature)
 
 
 df <- df %>% 
