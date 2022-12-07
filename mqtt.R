@@ -13,7 +13,7 @@ df <- feather::read_feather(path = "~/Dokumenty/R/mqtt/chrust_plus/mqtt_mpm.feat
 library(tidyr)
 df %>% unique() -> df
 df$Date <- as.POSIXct(df$Date)
-df$Temperature <- ifelse(df$Temperature == -127, NA, df$Temperature)
+# df$Temperature <- ifelse(df$Temperature == -127, NA, df$Temperature)
 
 
 df <- df %>% 
@@ -34,13 +34,13 @@ df$date <- as.POSIXct(df$date)
 
 df <- df %>% filter(date > "2022-10-14 16:50") %>% filter(date > (Sys.Date()-2))
 df$temp=ifelse(df$date < "2022-11-05 13:00", df$temp, df$temp2)
-
-df$WABT <- (df$bufor_top + df$bufor_bottom)/2
-#dt$WABT <- (1*dt$bufor_mid1 )
-
-df$delta_WABT <- df$WABT-df$temp_co
-#df$delta_WABT <- df$WABT-35
-df$Q_buf <- 600 * 4 * df$delta_WABT / 3412
+# 
+# df$WABT <- (df$bufor_top + df$bufor_bottom)/2
+# #dt$WABT <- (1*dt$bufor_mid1 )
+# 
+# df$delta_WABT <- df$WABT-df$temp_co
+# #df$delta_WABT <- df$WABT-35
+# df$Q_buf <- 600 * 4 * df$delta_WABT / 3412
 
 df %>% group_by(date = floor_date(date, unit="5 mins")) %>%
   summarize(temp=mean(temp,na.rm=T),
@@ -54,6 +54,13 @@ df %>% group_by(date = floor_date(date, unit="5 mins")) %>%
             bufor_bottom=mean(bufor_bottom,na.rm=T),
             Q_buf=mean(Q_buf,na.rm=T)) -> dt
 
+
+dt$WABT <- (dt$bufor_top + dt$bufor_bottom)/2
+#dt$WABT <- (1*dt$bufor_mid1 )
+
+dt$delta_WABT <- dt$WABT-dt$temp_co
+#df$delta_WABT <- df$WABT-35
+dt$Q_buf <- 600 * 4 * dt$delta_WABT / 3412
 
 
 # ##45 W na m2 
