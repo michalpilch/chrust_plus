@@ -51,8 +51,7 @@ df %>% group_by(date = floor_date(date, unit="5 mins")) %>%
             bufor_top=mean(bufor_top,na.rm=T) ,
             bufor_mid1=mean(bufor_mid1,na.rm=T) ,
             bufor_mid2=mean(bufor_mid2,na.rm=T) ,
-            bufor_bottom=mean(bufor_bottom,na.rm=T),
-            Q_buf=mean(Q_buf,na.rm=T)) -> dt
+            bufor_bottom=mean(bufor_bottom,na.rm=T)) -> dt
 
 
 dt$WABT <- (dt$bufor_top + dt$bufor_bottom)/2
