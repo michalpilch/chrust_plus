@@ -4,6 +4,7 @@ library(scales)
 library(feather)
 library(ggplot2)
 library(data.table)
+library(IAPWS95)
 #dump data
 
 #df <- feather::read_feather(path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
@@ -54,12 +55,33 @@ df %>% group_by(date = floor_date(date, unit="5 mins")) %>%
             bufor_bottom=mean(bufor_bottom,na.rm=T)) -> dt
 
 
-dt$WABT <- (dt$bufor_top + dt$bufor_bottom)/2
+#dt$WABT <- (dt$bufor_top + dt$bufor_bottom)/2
+
+dt$WABT <- (((dt$bufor_top + dt$bufor_mid1)/2) + 
+  ((dt$bufor_mid1 + dt$bufor_mid2)/2) + 
+  ((dt$bufor_mid2 + dt$bufor_bottom)/2) ) / 3
+
+dt$WABT <- ifelse(dt$WABT < 10 , NA, dt$WABT)
+dt %>% filter(WABT > 10 ) -> dt
+
 #dt$WABT <- (1*dt$bufor_mid1 )
 
 dt$delta_WABT <- dt$WABT-dt$temp_co
 #df$delta_WABT <- df$WABT-35
-dt$Q_buf <- 600 * 4 * dt$delta_WABT / 3412
+#dt$Q_buf <- 600 * 4 * dt$delta_WABT / 3412
+#
+# water enthalpy 
+dt$enth <- NA
+for (i in c(1:nrow(dt))){
+  dt$enth[i] <- hTp(273.15+dt$WABT[i], 0.1)
+}
+
+# water enthalpy * 600 kg to kWh (.277/1000)
+# minus 24.38 (energia zbiornika w temp 35 deg. C)
+# ###IAPWS95::hTp(273.15+35,.1) * 600 *.277/1000
+
+dt$Q_buf <- (600 * dt$enth * 0.277 / 1000) - 24.38
+
 
 
 # ##45 W na m2 
@@ -136,10 +158,10 @@ plot_buffer <-
 
 
 
-qp <- dt %>% filter(Q_buf > 0 & temp_co > 20) %>%  select(date,Q_buf,deltaT,temp_co) %>% 
+qp <- dt %>% filter(Q_buf > 0 & temp_co > 20) %>%  select(date,Q_buf,deltaT,temp_co, Q_buf_delta) %>% 
   ggplot(., aes(x=date)) +
   geom_point(aes(y=Q_buf/(deltaT/7.6),color=temp_co), size=2) +
-  geom_point(aes(y=Q_buf,color=deltaT/7.6), size=2) +
+  geom_point(aes(y=Q_buf,color=Q_buf_delta*12), size=2) +
   scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1)) +
   labs(x="data",y="pozostaly czas grzania z bufora [h]")
@@ -159,13 +181,11 @@ dt %>% group_by(date = floor_date(date, unit="60 mins")) %>%
             bufor_mid1=mean(bufor_mid1,na.rm=T) ,
             bufor_mid2=mean(bufor_mid2,na.rm=T) ,
             bufor_bottom=mean(bufor_bottom,na.rm=T),
-            Q_buf=mean(bufor_bottom,na.rm=T)) -> dth
+            enth=mean(enth,na.rm=T),
+            WABT=mean(WABT,na.rm=T)) -> dth
 
-dth$WABT <- (dth$bufor_top + dth$bufor_bottom)/2
-#dt$WABT <- (1*dt$bufor_mid1 )
 
-dth$delta_WABT <- dth$WABT-dth$temp_co
-dth$Q_buf <- 600 * 4 * dth$delta_WABT / 3412
+dth$Q_buf <- (600 * dth$enth * 0.277 / 1000) - 24.38
 dth$Q_buf_delta <- c(NA,diff(dth$Q_buf))
 
 dth$tryb <- ifelse(dth$Q_buf_delta>0,"load","discharge")
