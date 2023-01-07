@@ -97,13 +97,13 @@ dt$temp_home_delta <- c(NA,diff(dt$temp_home))
 dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 
 # 
-# p3<-dt %>%  filter(Q_buf_delta <0) %>%
-#   ggplot(., aes(x=date)) +
-#     geom_point(aes(y=deltaT/7.6/12, color=deltaT/7.6)) +
-#   geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
-#   scale_color_viridis_c() +
-#   theme(axis.text.x = element_text(angle = 70, hjust = 1))
-# plotly::ggplotly(p3)
+p3<-dt %>%  filter(Q_buf_delta <0) %>%
+  ggplot(., aes(x=date)) +
+    geom_point(aes(y=deltaT/6.06/12, color=deltaT/6.06)) +
+  geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
+  scale_color_viridis_c() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1))
+plotly::ggplotly(p3)
 # 
 # ##check
 # ##sprawdzene AOV czy delta bufora = deltaT/5.6
@@ -111,7 +111,7 @@ dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 # ##
 # library(tidyr)
 # data_long <- dt %>% filter(Q_buf_delta <0) %>%
-#   mutate(q=deltaT/7.6/12, Q_buf_delta = abs(Q_buf_delta)) %>%
+#   mutate(q=deltaT/6.06/12, Q_buf_delta = abs(Q_buf_delta)) %>%
 #   select(Q_buf_delta,q) %>%
 #   gather(condition, measurement, Q_buf_delta:q, factor_key=TRUE)
 # 
@@ -121,7 +121,7 @@ dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 # TukeyHSD(aov)
 
 krzywe<- dt %>% filter(temp_co > 0 & temp > -50 ) %>% 
-  ggplot(., aes(x=temp,y=temp_co, color=deltaT/7.6)) + 
+  ggplot(., aes(x=temp,y=temp_co, color=deltaT/6.06)) + 
   geom_point() + scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
 #plotly::ggplotly(krzywe)
@@ -160,7 +160,7 @@ plot_buffer <-
 
 qp <- dt %>% filter(Q_buf > 0 & temp_co > 20) %>%  select(date,Q_buf,deltaT,temp_co, Q_buf_delta) %>% 
   ggplot(., aes(x=date)) +
-  geom_point(aes(y=Q_buf/(deltaT/7.6),color=temp_co), size=2) +
+  geom_point(aes(y=Q_buf/(deltaT/6.06),color=temp_co), size=2) +
   geom_point(aes(y=Q_buf,color=Q_buf_delta*12), size=2) +
   scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1)) +
