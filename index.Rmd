@@ -1,0 +1,69 @@
+---
+title: "CHRUST_PLUS"
+# output_dir: docs
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      bg: "#1F968BFF"
+      fg: "#FDF7F7" 
+      primary: "#440154FF"
+      base_font:
+        google: Prompt
+      code_font:
+        google: JetBrains Mono
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+source("mqtt_update.R")
+source("mqtt.R")
+library("plotly")
+# Install thematic and un-comment for themed static plots (i.e., ggplot2)
+# thematic::thematic_rmd()
+```
+
+Column {data-width=600 .tabset}
+-----------------------------------------------------------------------
+
+<!-- ### Zapotrzebowanie cieplne -->
+
+<!-- ```{r} -->
+<!-- plotly::ggplotly(p3) -->
+<!-- ``` -->
+
+### Energia bufora
+
+```{r}
+plotly::ggplotly(qp)
+```
+
+### Temperatury
+
+```{r}
+ggplotly(plot_temp, dynamicTicks = TRUE) %>%
+ # rangeslider() %>%
+  layout(legend = list(orientation = 'h'))
+```
+
+
+Column {data-width=400 .tabset}
+-----------------------------------------------------------------------
+
+### Krzywa grzewcza
+
+```{r}
+plotly::ggplotly(krzywe)
+
+```
+
+### Profil temperatur bufora
+
+```{r}
+ggplotly(plot_buffer, dynamicTicks = TRUE) %>%
+ # rangeslider() %>%
+  layout(legend = list(orientation = 'h'))
+
+```
+
