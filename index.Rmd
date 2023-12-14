@@ -27,11 +27,11 @@ library("plotly")
 Column {data-width=600 .tabset}
 -----------------------------------------------------------------------
 
-<!-- ### Zapotrzebowanie cieplne -->
+### Zapotrzebowanie cieplne
 
-<!-- ```{r} -->
-<!-- plotly::ggplotly(p3) -->
-<!-- ``` -->
+```{r}
+plotly::ggplotly(p3)
+```
 
 ### Energia bufora
 
