@@ -183,8 +183,44 @@ qp <- dt %>% filter(Q_buf > 0 & temp_co > 20) %>%  select(date,Q_buf,deltaT,temp
   # labs(x="data",y="pozostaly czas grzania z bufora [h]")
   labs(x="data",y="Energia bufora [kWh]")
 #plotly::ggplotly(qp)
+#   
+# df[,c("date","bufor_top","bufor_mid1","bufor_mid2","bufor_bottom")] -> buf
+# # 
+# buf %>% reshape2::melt(id.vars=c("date")) -> buf
+# buf$variable <- ifelse(buf$variable == "bufor_top", 100,
+#                        ifelse(buf$variable == "bufor_mid1", 66,
+#                               ifelse(buf$variable == "bufor_mid2", 33, 0)))
+# 
+# 
+# buf <- na.omit(buf)
+# 
+# buf$lDate <- with(buf, ymd_hms(paste(date)))
+# buf$day  <- day(buf$lDate)
+# buf$hour  <- hour(buf$lDate)
+# 
+# profile <-ggplot(buf,aes((date),factor(variable)))+
+#   geom_bar(aes(color=value)) + 
+#   scale_colour_gradient(trans = "log")
+# profile
+# 
+# p <- buf %>% 
+#   ggplot(.,aes( y = as.factor(variable, x=) date, fill=value)) + 
+#   geom_tile() +
+#   scale_fill_viridis_c() 
 
 
 
+
+# 
+# 
+# 
+# 
+# 
+# 
+#   ggplot(., aes(x=date)) + 
+#   geom_point(aes(y=value, color=variable), size=2)+
+#   scale_color_viridis_d() +
+#   scale_x_datetime(breaks = "4 hours", date_labels = "%F %H:%m") + 
+#   theme(axis.text.x = element_text(angle = 70, hjust = 1),legend.position = "top")
 
 
