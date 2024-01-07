@@ -15,7 +15,7 @@ dbReadTable(con, "Temperature") -> df1
 #df2 <- feather::read_feather(path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
 df2 <- feather::read_feather(path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
 # 
-df <- unique(rbindlist(list(df1,df2)))
+df <- unique(rbindlist(list(df1,df2),fill = T))
 #feather::write_feather(df, path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
 feather::write_feather(df, path = "~/Dokumenty/R/mqtt/mqtt_mpm.feather")
 

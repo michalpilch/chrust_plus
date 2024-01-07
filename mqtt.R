@@ -23,6 +23,7 @@ df <- df %>%
   mutate(grouped_id = row_number())
 
 
+
 spread(df, key = DeviceRowID, value = Temperature) %>% 
 select(-grouped_id)-> df
 
@@ -35,7 +36,7 @@ colnames(df) <- c("chill", "rh", "pressure", "dew", "setpoint",
 df$date <- as.POSIXct(df$date)
 
 df <- df %>% filter(date > "2022-10-14 16:50") %>% filter(date > (Sys.Date()-3))
-df$temp=ifelse(df$date < "2022-11-05 13:00", df$temp, df$temp2)
+df$temp=ifelse(df$date < "2022-11-05 13:00" | df$date > "2024-01-06 00:00",df$temp, df$temp2)
 # 
 # df$WABT <- (df$bufor_top + df$bufor_bottom)/2
 # #dt$WABT <- (1*dt$bufor_mid1 )
