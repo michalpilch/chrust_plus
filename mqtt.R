@@ -114,19 +114,19 @@ dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 p3<-dt %>%  filter(Q_buf_delta <0) %>%
   ggplot(., aes(x=date)) +
     # geom_point(aes(y=deltaT/6.06/12, color=deltaT/6.06)) +
-   geom_point(aes(y=deltaT/4, color=temp)) + 
+   geom_point(aes(y=deltaT/3.3, color=temp)) + 
  # geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
   scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
-#plotly::ggplotly(p3)
+plotly::ggplotly(p3)
 # 
 # ##check
-# ##sprawdzene AOV czy delta bufora = deltaT/5.6
-# ##
-# ##
+##sprawdzene AOV czy delta bufora = deltaT/5.6
+##
+##
 # library(tidyr)
 # data_long <- dt %>% filter(Q_buf_delta <0) %>%
-#   mutate(q=deltaT/6.06/12, Q_buf_delta = abs(Q_buf_delta)) %>%
+#   mutate(q=deltaT/3.3/12, Q_buf_delta = abs(Q_buf_delta)) %>%
 #   select(Q_buf_delta,q) %>%
 #   gather(condition, measurement, Q_buf_delta:q, factor_key=TRUE)
 # 
