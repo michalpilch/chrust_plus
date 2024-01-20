@@ -73,6 +73,9 @@ dt$WABT <- (((dt$bufor_top + dt$bufor_mid1)/2) +
 dt$WABT <- ifelse(dt$WABT < 10 , NA, dt$WABT)
 dt %>% filter(WABT > 10 ) -> dt
 
+dt$WABT <- loess(dt$WABT ~ as.numeric(dt$date), span=0.05)$fitted
+
+
 #dt$WABT <- (1*dt$bufor_mid1 )
 
 dt$delta_WABT <- dt$WABT-dt$temp_co
@@ -114,11 +117,11 @@ dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 p3<-dt %>%  filter(Q_buf_delta <0) %>%
   ggplot(., aes(x=date)) +
     # geom_point(aes(y=deltaT/6.06/12, color=deltaT/6.06)) +
-   geom_point(aes(y=deltaT/3.3, color=temp)) + 
+   geom_point(aes(y=deltaT/4.4,color=temp)) + 
  # geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
   scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
-plotly::ggplotly(p3)
+#plotly::ggplotly(p3)
 # 
 # ##check
 ##sprawdzene AOV czy delta bufora = deltaT/5.6
