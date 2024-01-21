@@ -125,14 +125,6 @@ p3<-dt %>%  #filter(Q_buf_delta <0) %>%
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
 plotly::ggplotly(p3)
 
-moc_kotla <- dt %>%  # filter(Q_buf_delta > 0) %>%
-  ggplot(., aes(x=date)) +
-  # geom_point(aes(y=deltaT/6.06/12, color=deltaT/6.06)) +
-  geom_point(aes(y=((12* Q_buf_delta) + (deltaT/4.4)),color=temp)) + 
-  # geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
-  scale_color_viridis_c() +
-  theme(axis.text.x = element_text(angle = 70, hjust = 1))
-plotly::ggplotly(moc_kotla)
 
 
 # 
