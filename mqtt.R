@@ -73,7 +73,6 @@ dt$WABT <- (((dt$bufor_top + dt$bufor_mid1)/2) +
 dt$WABT <- ifelse(dt$WABT < 10 , NA, dt$WABT)
 dt %>% filter(WABT > 10 ) -> dt
 
-dt$WABT <- loess(dt$WABT ~ as.numeric(dt$date), span=0.05)$fitted
 
 
 #dt$WABT <- (1*dt$bufor_mid1 )
@@ -94,10 +93,10 @@ for (i in c(1:nrow(dt))){
 # dt$Q_buf <- (600 * dt$enth * 0.277 / 1000) - 24.38
 
 # water enthalpy * 600 kg to kWh (.277/1000)
-# minus 17,43 (energia zbiornika w temp 35 deg. C)
-### IAPWS95::hTp(273.15+25,.1) * 600 *.277/1000
+# minus 17,43 (energia zbiornika w temp 25 deg. C)
+#IAPWS95::hTp(273.15+25,.1) * 600 *.277/1000
 
-dt$Q_buf <- (600 * dt$enth * 0.277 / 1000) - 17.43
+dt$Q_buf <- (600 * dt$enth * 0.277 / 1000)  - 17.43
 
 
 
@@ -113,15 +112,29 @@ dt$temp_co_delta <- c(NA,diff(dt$temp_co))
 dt$temp_home_delta <- c(NA,diff(dt$temp_home))
 dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
 
+dt$WABT <- loess(dt$WABT ~ as.numeric(dt$date), span=0.05)$fitted
+dt$Q_buf_delta <- c(NA,loess(dt$Q_buf_delta ~ as.numeric(dt$date), span=0.05)$fitted)
+
 # 
-p3<-dt %>%  filter(Q_buf_delta <0) %>%
+p3<-dt %>%  #filter(Q_buf_delta <0) %>%
   ggplot(., aes(x=date)) +
     # geom_point(aes(y=deltaT/6.06/12, color=deltaT/6.06)) +
    geom_point(aes(y=deltaT/4.4,color=temp)) + 
  # geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
   scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
-#plotly::ggplotly(p3)
+plotly::ggplotly(p3)
+
+moc_kotla <- dt %>%  # filter(Q_buf_delta > 0) %>%
+  ggplot(., aes(x=date)) +
+  # geom_point(aes(y=deltaT/6.06/12, color=deltaT/6.06)) +
+  geom_point(aes(y=((12* Q_buf_delta) + (deltaT/4.4)),color=temp)) + 
+  # geom_point(aes(y=abs(Q_buf_delta), color=Q_buf_delta)) +
+  scale_color_viridis_c() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1))
+plotly::ggplotly(moc_kotla)
+
+
 # 
 # ##check
 ##sprawdzene AOV czy delta bufora = deltaT/5.6
