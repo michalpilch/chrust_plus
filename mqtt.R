@@ -152,7 +152,7 @@ plotly::ggplotly(moc_kotla)
 # TukeyHSD(aov)
 
 krzywe<- dt %>% filter(temp_co > 0 & temp > -50 ) %>% 
-  ggplot(., aes(x=temp,y=temp_co, color=deltaT/4)) + 
+  ggplot(., aes(x=temp,y=temp_co, color=deltaT/4.4)) + 
   geom_point() + scale_color_viridis_c() +
   theme(axis.text.x = element_text(angle = 70, hjust = 1))
 #plotly::ggplotly(krzywe)
@@ -239,5 +239,4 @@ qp <- dt %>% filter(Q_buf > 0 & temp_co > 20) %>%  select(date,Q_buf,deltaT,temp
 #   scale_color_viridis_d() +
 #   scale_x_datetime(breaks = "4 hours", date_labels = "%F %H:%m") + 
 #   theme(axis.text.x = element_text(angle = 70, hjust = 1),legend.position = "top")
-
 
