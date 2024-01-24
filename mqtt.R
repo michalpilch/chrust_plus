@@ -111,9 +111,9 @@ dt$deltaT = dt$temp_home - dt$temp
 dt$temp_co_delta <- c(NA,diff(dt$temp_co))
 dt$temp_home_delta <- c(NA,diff(dt$temp_home))
 dt$Q_buf_delta <- c(NA,diff(dt$Q_buf))
-
-dt$WABT <- loess(dt$WABT ~ as.numeric(dt$date), span=0.05)$fitted
-dt$Q_buf_delta <- c(NA,loess(dt$Q_buf_delta ~ as.numeric(dt$date), span=0.05)$fitted)
+# 
+# dt$WABT <- loess(dt$WABT ~ as.numeric(dt$date), span=0.05)$fitted
+# dt$Q_buf_delta <- c(NA,loess(dt$Q_buf_delta ~ as.numeric(dt$date), span=0.05)$fitted)
 
 # 
 p3<-dt %>%  #filter(Q_buf_delta <0) %>%
