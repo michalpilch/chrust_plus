@@ -27,11 +27,11 @@ library("plotly")
 Column {data-width=600 .tabset}
 -----------------------------------------------------------------------
 
-### Zapotrzebowanie cieplne
+<!-- ### Zapotrzebowanie cieplne -->
 
-```{r}
-plotly::ggplotly(p3)
-```
+<!-- ```{r} -->
+<!-- plotly::ggplotly(p3) -->
+<!-- ``` -->
 
 ### Energia bufora
 
@@ -39,24 +39,24 @@ plotly::ggplotly(p3)
 plotly::ggplotly(qp)
 ```
 
-### Temperatury
+<!-- ### Temperatury -->
 
-```{r}
-ggplotly(plot_temp, dynamicTicks = TRUE) %>%
- # rangeslider() %>%
-  layout(legend = list(orientation = 'h'))
-```
+<!-- ```{r} -->
+<!-- ggplotly(plot_temp, dynamicTicks = TRUE) %>% -->
+<!--  # rangeslider() %>% -->
+<!--   layout(legend = list(orientation = 'h')) -->
+<!-- ``` -->
 
 
 Column {data-width=400 .tabset}
 -----------------------------------------------------------------------
 
-### Krzywa grzewcza
+<!-- ### Krzywa grzewcza -->
 
-```{r}
-plotly::ggplotly(krzywe)
+<!-- ```{r} -->
+<!-- plotly::ggplotly(krzywe) -->
 
-```
+<!-- ``` -->
 
 ### Profil temperatur bufora
 
