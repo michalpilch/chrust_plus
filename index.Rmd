@@ -15,7 +15,7 @@ output:
     vertical_layout: fill
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 library(flexdashboard)
 source("mqtt_update.R")
 source("mqtt.R")
