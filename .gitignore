@@ -6,3 +6,5 @@ gemini_upgrade/backup_mqtt_mpm.feather
 mqtt_mpm.feather_bak
 gemini_upgrade/ml_model_data_for_app.feather
 gemini_upgrade/ml_model_data_hourly_demand.feather
+*.feather
+*.feather_bak

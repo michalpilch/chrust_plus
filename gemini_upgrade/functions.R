@@ -10,41 +10,9 @@ library(pracma)
 library(plotly)
 
 process_data <- function(df_raw) {
-  # Apply original mqtt.R processing steps for wide format
-  df <- df_raw %>% unique()
-  
-  df <- df %>% 
-    group_by(DeviceRowID) %>% 
-    mutate(grouped_id = row_number())
-  
-  # Using spread as in the original script
-  suppressWarnings({
-    df_wide_temp <- spread(df, key = DeviceRowID, value = Temperature) %>% 
-    select(-grouped_id)
-  })
-
-  # Define the mapping for numeric DeviceRowIDs to meaningful names
-  device_id_to_name_map <- c(
-    "1" = "temp_piec",
-    "2" = "temp_co",
-    "3" = "bufor_top",
-    "4" = "bufor_mid1",
-    "5" = "bufor_mid2",
-    "6" = "bufor_bottom",
-    "7" = "temp_home",
-    "8" = "temp",
-    "9" = "wind"
-  )
-
-  # Get the current column names that are numeric DeviceRowIDs (as strings)
-  numeric_id_cols_present <- colnames(df_wide_temp)[colnames(df_wide_temp) %in% names(device_id_to_name_map)]
-
-  # Create a renaming vector for only the existing numeric ID columns
-  renaming_vector <- device_id_to_name_map[numeric_id_cols_present]
-
-  # Rename the columns that exist
-  df_wide <- df_wide_temp %>% 
-    rename(!!!renaming_vector)
+  df_wide <- df_raw %>% 
+    select(date, name, Temperature, chill, rh, pressure, dew, setpoint) %>% 
+    pivot_wider(names_from = name, values_from = Temperature, values_fn = list(Temperature = mean))
 
   # Define all expected columns (including those from initial rename in mqtt_update.R)
   all_expected_cols <- c("chill", "rh", "pressure", "dew", "setpoint", "date",
@@ -100,6 +68,12 @@ dt <- dt %>% filter(!is.na(WABT) & WABT > 10 )
 dt$delta_WABT <- dt$WABT-dt$temp_co
 
 dt$enth <- NA
+
+  # If dt is empty, return early to prevent errors in the loop
+  if (nrow(dt) == 0) {
+    return(dt)
+  }
+
 for (i in c(1:nrow(dt))){
   if(!is.na(dt$WABT[i])) {
     dt$enth[i] <- hTp(273.15+dt$WABT[i], 0.1)

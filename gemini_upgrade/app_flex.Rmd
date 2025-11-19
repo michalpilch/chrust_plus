@@ -1,0 +1,127 @@
+---
+title: "CHRUST_PLUS Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows # Ensures vertical stacking of top-level elements
+    vertical_layout: fill
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(plotly)
+library(dplyr)
+library(h2o)
+library(feather)
+library(rmarkdown) # Ensure rmarkdown is loaded for rendering
+library(htmltools) # Add htmltools for the HTML() function
+
+
+# Source the functions script globally so plotting functions are available
+source("functions.R")
+
+# Initialize H2O
+h2o.init()
+
+# Load the H2O model
+model_path <- "GBM_model_R_1758988233368_1"
+model <- h2o.loadModel(model_path)
+
+# Load the processed data
+data_file <- "ml_model_data_for_app.feather"
+if (!file.exists(data_file)) {
+  stop("Data file not found. Please ensure the ETL process has run.")
+}
+dt <- read_feather(data_file)
+
+# Ensure dt is not empty before proceeding
+if (nrow(dt) == 0) {
+  stop("No data available from ml_model_data_for_app.feather")
+}
+
+# Reactive expression for the latest data point, ensuring it's not empty and has required columns
+# This logic is adapted from app.R for static rendering
+latest_data_point <- dt[nrow(dt), ]
+
+# Ensure all predictors are present and handle NAs for prediction
+predictors <- c("temp_home", "temp", "temp_piec", "temp_co", "bufor_top", "bufor_mid1", "bufor_mid2", "bufor_bottom", "WABT", "heating_cycle", "discharging_cycle", "heat_demand_kwh", "temp_lag1", "heat_demand_kwh_lag1")
+
+# Check if all predictors exist in latest_data_point
+if (!all(predictors %in% colnames(latest_data_point))) {
+  stop("Missing predictors in latest data point for H2O prediction.")
+}
+
+# Replace NAs in predictors with 0 or a reasonable default for prediction
+for (p in predictors) {
+  if (is.na(latest_data_point[[p]])) {
+    latest_point[[p]] <- 0 # Basic imputation: replace NA with 0
+  }
+}
+
+# H2O Prediction
+latest_data_h2o <- as.h2o(latest_data_point)
+prediction <- h2o.predict(model, latest_data_h2o)
+wood_needed <- as.data.frame(prediction)$predict
+
+# Disconnect H2O
+h2o.shutdown(prompt = FALSE)
+```
+
+#### Sugerowana ilość drewna
+
+```{r}
+valueBox(
+  value = HTML(paste0("<span style='color:#2c3e50;'>", round(wood_needed, 2), " kg</span>")),
+  icon = "fa-fire"
+)
+```
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Energia bufora
+
+```{r}
+# Ensure dt is not empty before plotting
+if (nrow(dt) > 0) {
+  qp_plot_obj <- plot_energy_buffer(dt)
+  plotly::ggplotly(qp_plot_obj, height = 500)
+} else {
+  cat("No data for qp_plot.")
+}
+```
+
+### Temperatury
+
+```{r}
+if (nrow(dt) > 0) {
+  temp_plot_obj <- plot_temperatures(dt)
+  plotly::ggplotly(temp_plot_obj, dynamicTicks = TRUE, height = 500) %>%
+    layout(legend = list(orientation = 'h'))
+} else {
+  cat("No data for temp_plot.")
+}
+```
+
+### Profil bufora
+
+```{r}
+if (nrow(dt) > 0) {
+  buffer_plot_obj <- plot_buffer_profile(dt)
+  plotly::ggplotly(buffer_plot_obj, dynamicTicks = TRUE, height = 500) %>%
+    layout(legend = list(orientation = 'h'))
+} else {
+  cat("No data for buffer_plot.")
+}
+```
+
+### Krzywa grzewcza
+
+```{r}
+if (nrow(dt) > 0) {
+  krzywe_plot_obj <- plot_heating_curve(dt)
+  plotly::ggplotly(krzywe_plot_obj, height = 500)
+} else {
+  cat("No data for krzywe_plot.")
+}
+```
