@@ -1,0 +1,15 @@
+# Remove the large files from Git's cache (they will remain on your local disk)
+git rm --cached gemini_upgrade/backup_mqtt_mpm.feather
+git rm --cached mqtt_mpm.feather_bak
+
+# Now, add the .gitignore and your other important files
+git add .gitignore
+git add gemini_upgrade/app_flex.Rmd
+git add gemini_upgrade/functions.R
+git add .github/workflows/deploy-dashboard.yml
+
+# Commit these changes
+git commit -m "Add flexdashboard, GitHub Action, and ignore large data files"
+
+# Now, push the cleaned-up main branch to GitHub
+git push origin main

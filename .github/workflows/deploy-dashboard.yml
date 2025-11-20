@@ -4,78 +4,29 @@ on:
   push:
     branches:
       - main # Trigger the action on push to the main branch
-  schedule:
-    - cron: '*/15 * * * *' # Run every 15 minutes
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: '4.2' # Specify a version of R
-
-      - name: Install R Dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          packages:
-            any::flexdashboard
-            any::rmarkdown
-            any::plotly
-            any::dplyr
-            any::h2o
-            any::feather
-            any::tidyr
-            any::lubridate
-            any::DBI
-            any::RSQLite
-            any::htmltools
-            any::pracma
-            any::IAPWS95
-
-      - name: Run ETL to get latest data
-        working-directory: ./gemini_upgrade
-        run: Rscript run_etl.R
-        
-      - name: Render flexdashboard
-        working-directory: ./gemini_upgrade
-        run: Rscript -e 'rmarkdown::render("app_flex.Rmd", output_file = "../index.html")'
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: .
-          # This specifies which files/directories to actually deploy.
-          # We deploy the generated index.html and the source Rmd.
-          allow_empty_commit: false
-          keep_files: false
+          publish_dir: . # Deploy from the root of the checked-out repository
+          keep_files: false # Ensure only specified files are kept
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: "Auto-deploy flexdashboard: $(date)"
+          commit_message: "Auto-deploy flexdashboard (local build): $(date)"
           force_orphan: true
-          # We only want the index.html and Rmd in the gh-pages branch
-          # This is a cleaner way to specify the files to publish
-          # Create a temporary directory, copy the files, and deploy from there.
-      - name: Prepare deployment artifacts
-        run: |
-          mkdir public
-          cp index.html public/
-          cp gemini_upgrade/app_flex.Rmd public/
-      - name: Deploy selected files
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./public
-          keep_files: false
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: "Auto-deploy flexdashboard: $(date)"
-          force_orphan: true
+          # Specify files to include in deployment.
+          # The index.html is expected at the root of the repo due to local generation.
+          # The app_flex.Rmd source is in gemini_upgrade.
+          filter: |
+            index.html
+            gemini_upgrade/app_flex.Rmd

@@ -1,0 +1,2 @@
+# Update data for the local Shiny app every 15 minutes
+*/15 * * * * /home/dsl/gemini/chrust_plus/gemini_upgrade/update_data.sh >> /home/dsl/gemini/chrust_plus/gemini_upgrade/update_data.log 2>&1

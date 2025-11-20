@@ -1,0 +1,10 @@
+# CHRUST_PLUS Automation Schedule
+
+# 1. Update local data from Domoticz database every 15 minutes.
+*/15 * * * * /home/dsl/gemini/chrust_plus/gemini_upgrade/update_data.sh >> /home/dsl/gemini/chrust_plus/gemini_upgrade/update_data.log 2>&1
+
+# 2. Generate the flexdashboard HTML 2 minutes later.
+2,17,32,47 * * * * /home/dsl/gemini/chrust_plus/gemini_upgrade/deploy_dashboard.sh >> /home/dsl/gemini/chrust_plus/gemini_upgrade/deploy_dashboard.log 2>&1
+
+# 3. Commit and push the updated index.html to GitHub 3 minutes after generation starts.
+5,20,35,50 * * * * /home/dsl/gemini/chrust_plus/gemini_upgrade/git_deploy.sh >> /home/dsl/gemini/chrust_plus/gemini_upgrade/git_deploy.log 2>&1
