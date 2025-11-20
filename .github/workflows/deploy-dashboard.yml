@@ -13,20 +13,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Create deployment directory
+        run: mkdir public
+      
+      - name: Copy deployment artifacts
+        run: |
+          cp index.html public/
+          cp gemini_upgrade/app_flex.Rmd public/
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: . # Deploy from the root of the checked-out repository
-          keep_files: false # Ensure only specified files are kept
+          publish_dir: ./public
+          keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: "Auto-deploy flexdashboard (local build): $(date)"
           force_orphan: true
-          # Specify files to include in deployment.
-          # The index.html is expected at the root of the repo due to local generation.
-          # The app_flex.Rmd source is in gemini_upgrade.
-          filter: |
-            index.html
-            gemini_upgrade/app_flex.Rmd
