@@ -10,9 +10,21 @@ library(pracma)
 library(plotly)
 
 process_data <- function(df_raw) {
-  df_wide <- df_raw %>% 
-    select(date, name, Temperature, chill, rh, pressure, dew, setpoint) %>% 
-    pivot_wider(names_from = name, values_from = Temperature, values_fn = list(Temperature = mean))
+  # Isolate temperature data and pivot
+  temp_data_wide <- df_raw %>%
+    select(date, name, Temperature) %>%
+    group_by(date, name) %>%
+    summarise(Temperature = mean(Temperature, na.rm = TRUE)) %>%
+    pivot_wider(names_from = name, values_from = Temperature)
+
+  # Get the other data, ensuring we only have one row per timestamp
+  other_data <- df_raw %>%
+    select(date, chill, rh, pressure, dew, setpoint) %>%
+    group_by(date) %>%
+    summarise(across(everything(), ~mean(.x, na.rm = TRUE)))
+
+  # Join the pivoted temperature data with the other data
+  df_wide <- left_join(temp_data_wide, other_data, by = "date")
 
   # Define all expected columns (including those from initial rename in mqtt_update.R)
   all_expected_cols <- c("chill", "rh", "pressure", "dew", "setpoint", "date",

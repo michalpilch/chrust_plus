@@ -23,7 +23,19 @@ df_processed <- df_raw %>%
     dew = DewPoint,
     setpoint = SetPoint
   ) %>%
-  mutate(date = as.POSIXct(date))
+  mutate(date = as.POSIXct(date)) %>%
+  # Create a 'name' column by mapping DeviceRowID to meaningful names for pivoting
+  mutate(name = case_when(
+    DeviceRowID == 1 ~ "temp_piec",
+    DeviceRowID == 2 ~ "temp_co",
+    DeviceRowID == 3 ~ "bufor_top",
+    DeviceRowID == 4 ~ "bufor_mid1",
+    DeviceRowID == 5 ~ "bufor_mid2",
+    DeviceRowID == 6 ~ "bufor_bottom",
+    DeviceRowID == 7 ~ "temp_home",
+    DeviceRowID == 8 ~ "temp",
+    DeviceRowID == 9 ~ "wind",
+    TRUE ~ as.character(DeviceRowID) # Fallback for any unexpected DeviceRowID
+  ))
 
-# Return the processed data frame
-# This df_processed will be used as input to the process_data function in functions.R
+# The df_processed dataframe will be used as input to the process_data function in functions.R
