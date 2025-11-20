@@ -20,7 +20,7 @@ jobs:
         with:
           r-version: '4.2' # Specify a version of R
 
-      - name's: Install R Dependencies
+      - name: Install R Dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages:
@@ -30,42 +30,52 @@ jobs:
             any::dplyr
             any::h2o
             any::feather
+            any::tidyr
+            any::lubridate
+            any::DBI
+            any::RSQLite
+            any::htmltools
+            any::pracma
+            any::IAPWS95
 
       - name: Run ETL to get latest data
-        run: Rscript gemini_upgrade/run_etl.R
+        working-directory: ./gemini_upgrade
+        run: Rscript run_etl.R
         
       - name: Render flexdashboard
-        run: Rscript -e 'rmarkdown::render("gemini_upgrade/app_flex.Rmd", output_file = "index.html")'
+        working-directory: ./gemini_upgrade
+        run: Rscript -e 'rmarkdown::render("app_flex.Rmd", output_file = "../index.html")'
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
           publish_dir: .
-          publish_branch: gh-pages
-          # Keep only the files we want
-          keep_files: false 
-          # Specify which files to deploy
-          # This will deploy index.html and the Rmd source file
-          cname: '' # Add your custom domain here if you have one
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: "Auto-deploy flexdashboard: $(date)"
-          # The following line is a bit of a workaround to specify multiple files
-          # We'll move the files to a temporary directory to deploy them
-      - run: |
-          mkdir deploy_dir
-          mv index.html deploy_dir/
-          mv gemini_upgrade/app_flex.Rmd deploy_dir/
-          
-      - name: Deploy selected files
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./deploy_dir
-          publish_branch: gh-pages
+          # This specifies which files/directories to actually deploy.
+          # We deploy the generated index.html and the source Rmd.
+          allow_empty_commit: false
           keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: "Auto-deploy flexdashboard: $(date)"
-
+          force_orphan: true
+          # We only want the index.html and Rmd in the gh-pages branch
+          # This is a cleaner way to specify the files to publish
+          # Create a temporary directory, copy the files, and deploy from there.
+      - name: Prepare deployment artifacts
+        run: |
+          mkdir public
+          cp index.html public/
+          cp gemini_upgrade/app_flex.Rmd public/
+      - name: Deploy selected files
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./public
+          keep_files: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: "Auto-deploy flexdashboard: $(date)"
+          force_orphan: true
