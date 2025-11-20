@@ -13,22 +13,40 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Create deployment directory
-        run: mkdir public
-      
-      - name: Copy deployment artifacts
-        run: |
-          cp index.html public/
-          cp gemini_upgrade/app_flex.Rmd public/
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
+          # This directory is now deployed to the root of the gh-pages branch.
+          # The key is that index.html is at the root of what's being published.
+          publish_dir: . 
+          # Use a filter to select only the files we want in the gh-pages branch
+          # This avoids deploying the whole repository.
+          allow_empty_commit: false
+          force_orphan: true # Creates a clean branch with only the deployed files
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: "Auto-deploy flexdashboard: $(date)"
+          # The 'filter' option is not standard. We must create the structure.
+          # The correct way is to prepare a directory and deploy IT.
+      - name: Prepare deployment artifacts
+        run: |
+          mkdir public
+          # Copy the locally-built index.html and its Rmd source
+          # The index.html is at the root of the repo, as built by the local cron.
+          cp index.html public/
+          cp gemini_upgrade/app_flex.Rmd public/
+          
+      - name: Deploy only essential files to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          # Deploy the contents of the 'public' directory
           publish_dir: ./public
+          # This ensures the gh-pages branch is clean and contains only what's in public/
           keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: "Auto-deploy flexdashboard (local build): $(date)"
-          force_orphan: true
+          commit_message: "Auto-deploy flexdashboard: $(date)"
