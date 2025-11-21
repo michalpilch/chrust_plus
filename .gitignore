@@ -1,10 +1,31 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-gemini_upgrade/backup_mqtt_mpm.feather
-mqtt_mpm.feather_bak
-gemini_upgrade/ml_model_data_for_app.feather
-gemini_upgrade/ml_model_data_hourly_demand.feather
-*.feather
-*.feather_bak
+# Ignore everything by default
+*
+
+# But, DO NOT ignore the following files and directories:
+!/.gitignore
+!/README.md
+!/chrust_plus.Rproj
+
+# Allow the gemini_upgrade directory, but ignore its contents by default
+!/gemini_upgrade/
+/gemini_upgrade/*
+
+# But, DO NOT ignore these specific files inside gemini_upgrade
+!/gemini_upgrade/app.R
+!/gemini_upgrade/app_flex.Rmd
+!/gemini_upgrade/functions.R
+!/gemini_upgrade/run_etl.R
+!/gemini_upgrade/mqtt_update.R
+!/gemini_upgrade/deploy_dashboard.sh
+!/gemini_upgrade/git_deploy.sh
+!/gemini_upgrade/update_data.sh
+
+# Allow the .github directory for workflows
+!/.github/
+/github/*
+!/.github/workflows/
+/github/workflows/*
+!/.github/workflows/deploy-dashboard.yml
+
+# IMPORTANT: Also do not ignore the root index.html that gets generated
+!/index.html

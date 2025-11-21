@@ -4,8 +4,10 @@
 # Navigate to the repository root
 cd /home/dsl/gemini/chrust_plus/
 
-# Add the generated index.html and its source Rmd
-git add index.html gemini_upgrade/app_flex.Rmd
+# Force-add the generated index.html and its source Rmd.
+# The --force flag ensures they are added even if ignored elsewhere.
+git add --force index.html
+git add gemini_upgrade/app_flex.Rmd
 
 # Check if there are any changes to commit
 if ! git diff --cached --exit-code --quiet; then
