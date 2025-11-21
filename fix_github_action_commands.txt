@@ -1,8 +1,0 @@
-# Add the corrected GitHub Action workflow file
-git add .github/workflows/deploy-dashboard.yml
-
-# Commit the fix
-git commit -m "Fix GitHub Action: add missing R packages and correct deployment steps"
-
-# Push the fix to the main branch
-git push origin main

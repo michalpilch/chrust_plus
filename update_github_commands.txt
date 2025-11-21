@@ -1,3 +1,0 @@
-git add .github/workflows/deploy-dashboard.yml
-git commit -m "Update GitHub Action schedule to run every 15 minutes"
-git push origin main

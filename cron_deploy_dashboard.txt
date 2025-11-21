@@ -1,2 +1,0 @@
-# Generate flexdashboard HTML locally, 2 minutes after data update
-2,17,32,47 * * * * /home/dsl/gemini/chrust_plus/gemini_upgrade/deploy_dashboard.sh >> /home/dsl/gemini/chrust_plus/gemini_upgrade/deploy_dashboard.log 2>&1

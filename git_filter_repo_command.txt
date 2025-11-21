@@ -1,1 +1,0 @@
-git-filter-repo --path gemini_upgrade/backup_mqtt_mpm.feather --path mqtt_mpm.feather_bak --invert-paths
