@@ -70,9 +70,7 @@ process_data <- function(df_raw) {
   dt <- dt[rowSums(is.na(dt)) < (ncol(dt) - 1), ]
   
   # Calculate buffer energy and deltas
-  dt$WABT <- (((dt$bufor_top + dt$bufor_mid1)/2) + 
-              ((dt$bufor_mid1 + dt$bufor_mid2)/2) + 
-              ((dt$bufor_mid2 + dt$bufor_bottom)/2) ) / 3
+  dt$WABT <- (bufor_bottom * 52 + bufor_mid2*37 + bufor_mid1 * 34 + bufor_top * 46) / 169
 
 dt$WABT <- ifelse(dt$WABT < 10 , NA, dt$WABT)
 dt <- dt %>% filter(!is.na(WABT) & WABT > 10 )
