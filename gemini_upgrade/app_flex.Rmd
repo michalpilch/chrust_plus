@@ -54,7 +54,7 @@ if (!all(predictors %in% colnames(latest_data_point))) {
 # Replace NAs in predictors with 0 or a reasonable default for prediction
 for (p in predictors) {
   if (is.na(latest_data_point[[p]])) {
-    latest_point[[p]] <- 0 # Basic imputation: replace NA with 0
+    latest_data_point[[p]] <- 0 # Basic imputation: replace NA with 0
   }
 }
 
