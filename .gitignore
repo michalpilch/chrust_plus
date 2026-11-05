@@ -4,7 +4,6 @@
 # But, DO NOT ignore the following files and directories:
 !/.gitignore
 !/README.md
-!/chrust_plus.Rproj
 
 # Allow the gemini_upgrade directory, but ignore its contents by default
 !/gemini_upgrade/
