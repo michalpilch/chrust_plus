@@ -57,6 +57,7 @@ installation_id = st.sidebar.selectbox(
 inst_data = mcp_server.get_installation_parameters(installation_id)
 telem_data = mcp_server.get_latest_telemetry(installation_id)
 wood_calc = mcp_server.calculate_wood_demand(installation_id)
+dhw_status = mcp_server.check_dhw_status(installation_id)
 
 inst = inst_data.get("installation", {})
 telem = telem_data.get("telemetry", {})
@@ -77,7 +78,7 @@ st.sidebar.markdown(f"**Paliwo:** {inst.get('fuel_type', 'suchy buk')}")
 st.title(f"🔥 Panel Kotłowni: {inst.get('client_name', 'Instalacja')} ({installation_id})")
 st.caption(f"Ostatni odczyt telemetryczny: {telem.get('timestamp', 'Brak danych')} UTC (BigQuery: europe-central2)")
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
     rec_wood = wood_calc.get("recommended_wood_kg", 0.0)
@@ -88,6 +89,18 @@ with col1:
     )
 
 with col2:
+    can_shower = dhw_status.get("can_take_shower", False)
+    t_tap = dhw_status.get("estimated_water_temp_c", 0.0)
+    showers_left = dhw_status.get("estimated_showers_available", 0)
+    st.metric(
+        label="🚿 Prysznic / Ciepła woda",
+        value="Dostępny" if can_shower else "Zimna woda",
+        delta=f"Woda ~{t_tap}°C ({showers_left} prysznice)",
+        delta_color="normal" if can_shower else "inverse",
+        help="Ciepła woda jest grzana przepływowo przez wężownicę w buforze. Zależy głównie od bufor_top.",
+    )
+
+with col3:
     wabt = telem.get("wabt", 0.0)
     q_buf = telem.get("q_buf", 0.0)
     st.metric(
@@ -96,7 +109,7 @@ with col2:
         delta=f"{q_buf:.1f} kWh zgromadzone",
     )
 
-with col3:
+with col4:
     t_piec = telem.get("temp_piec", 0.0)
     st.metric(
         label="🔥 Temperatura kotła",
@@ -105,7 +118,7 @@ with col3:
         delta_color="normal" if t_piec > 55 else "off",
     )
 
-with col4:
+with col5:
     t_ext = telem.get("temp_ext", 0.0)
     t_co = telem.get("temp_co", 0.0)
     st.metric(
@@ -191,8 +204,19 @@ if prompt := st.chat_input("Zadaj pytanie asystentowi (np. 'Czy muszę dzisiaj j
     system_prompt = f"""
     Jesteś profesjonalnym inżynierem i doradcą klienta w systemie Heating IQ Platform.
     Pracujesz z instalacją o ID: '{installation_id}'.
-    Masz dostęp do narzędzi MCP podłączonych do BigQuery (parametry instalacji, ostatnia telemetria, historia, kalkulator drewna) oraz stacji pogodowej Weather Underground.
-    Zawsze odpowiadaj rzeczowo, uprzejmie i w języku polskim. Wyjaśniaj fizyczne przesłanki swoich rekomendacji.
+
+    KLUCZOWE ZASADY FIZYKI I INSTALACJI:
+    1. CIEPŁA WODA UŻYTKOWA (DHW / CWU / PRYSZNIC):
+       - W buforze 600L znajduje się przepływowa wężownica ze stali nierdzewnej umieszczona w GÓRNEJ części bufora.
+       - Bufor jest uwarstwiony termicznie. Dlatego o dostępności ciepłej wody na prysznic decyduje wyłącznie temperatura w górnej strefie: `bufor_top` oraz `bufor_mid1`, a NIGDY średnia temperatura bufora (WABT)!
+       - Gdy użytkownik pyta o prysznic, kąpiel lub ciepłą wodę do mycia: ZAWSZE wywołaj narzędzie `check_dhw_status`.
+       - Kryteria:
+         * bufor_top >= 48°C: Komfort wysoki, gorąca woda pod dostatkiem (można brać długi prysznic lub kąpiel).
+         * 42°C <= bufor_top < 48°C: Komfort umiarkowany (krótki, ekonomiczny prysznic).
+         * bufor_top < 42°C: Brak ciepłej wody (woda za zimna na prysznic, należy rozpalić w kotle).
+    2. DREWNO I KOCIOŁ:
+       - Używaj `calculate_wood_demand` do wyliczenia optymalnego wsadu (bezpieczny pułap WABT to 70°C).
+    3. Zawsze odpowiadaj rzeczowo, uprzejmie i w języku polskim. Wyjaśniaj fizyczne przesłanki swoich rekomendacji.
     """
 
     with st.chat_message("assistant"):
@@ -206,6 +230,7 @@ if prompt := st.chat_input("Zadaj pytanie asystentowi (np. 'Czy muszę dzisiaj j
                         mcp_server.get_latest_telemetry,
                         mcp_server.get_telemetry_history,
                         mcp_server.calculate_wood_demand,
+                        mcp_server.check_dhw_status,
                         mcp_server.get_weather,
                     ],
                 ),

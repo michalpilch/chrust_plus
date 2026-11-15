@@ -259,6 +259,77 @@ def calculate_wood_demand(
 
 
 @mcp.tool()
+def check_dhw_status(installation_id: str = DEFAULT_INSTALLATION_ID) -> Dict[str, Any]:
+    """
+    Check Domestic Hot Water (DHW / CWU) availability for showers or baths.
+
+    The buffer tank contains an internal stainless-steel/copper flow-through coil
+    located in the UPPER zone of the buffer. Because water is stratified, DHW
+    availability is determined primarily by bufor_top and bufor_mid1, NOT by
+    the average buffer temperature (WABT).
+
+    Returns:
+    - can_take_shower: bool (True if comfortable shower is possible)
+    - comfort_level: high / medium / no hot water
+    - estimated_water_temp_c: estimated domestic water output temp
+    - estimated_showers_available: approximate number of 45-liter showers
+    - advice: clear recommendation for user
+    """
+    try:
+        inst_res = get_installation_parameters(installation_id)
+        if "error" in inst_res:
+            return inst_res
+        inst = inst_res["installation"]
+
+        has_coil = inst.get("has_dhw_coil", True)
+        min_temp = float(inst.get("dhw_min_temp_c", 45.0))
+
+        telem_res = get_latest_telemetry(installation_id)
+        if "error" in telem_res:
+            return telem_res
+        telem = telem_res["telemetry"]
+
+        t_top = float(telem.get("bufor_top", 0.0))
+        t_mid1 = float(telem.get("bufor_mid1", 0.0))
+        wabt = float(telem.get("wabt", 0.0))
+
+        estimated_tap_temp = round(max(10.0, t_top - 3.5), 1)
+
+        t_upper_avg = (t_top + t_mid1) / 2.0
+        usable_energy_kwh = max(0.0, 250.0 * 4.186 * (t_upper_avg - 38.0) / 3600.0)
+        available_showers = int(usable_energy_kwh / 1.5) if t_top >= 42.0 else 0
+
+        if t_top >= min_temp + 3.0:
+            can_shower = True
+            comfort = "KOMFORT WYSOKI (gorąca woda pod dostatkiem)"
+            advice = f"Można bez obaw brać długi prysznic lub kąpiel. Woda na wylewce osiągnie ok. {estimated_tap_temp}°C."
+        elif t_top >= min_temp - 3.0:
+            can_shower = True
+            comfort = "KOMFORT UMIARKOWANY (krótki, ekonomiczny prysznic)"
+            advice = f"Ciepła woda jest dostępna (ok. {estimated_tap_temp}°C), ale bufor w górnej strefie jest na wyczerpaniu. Zalecany szybki prysznic."
+        else:
+            can_shower = False
+            comfort = "BRAK CIEPŁEJ WODY (woda letnia lub zimna)"
+            advice = f"Temperatura góry bufora ({t_top:.1f}°C) jest zbyt niska na prysznic. Woda na wylewce będzie miała poniżej 38°C. Należy rozpalić w kotle."
+
+        return {
+            "status": "SUCCESS",
+            "installation_id": installation_id,
+            "has_dhw_coil": has_coil,
+            "can_take_shower": can_shower,
+            "comfort_level": comfort,
+            "bufor_top_c": round(t_top, 1),
+            "bufor_mid1_c": round(t_mid1, 1),
+            "wabt_average_c": round(wabt, 1),
+            "estimated_water_temp_c": estimated_tap_temp,
+            "estimated_showers_available": available_showers,
+            "advice": advice,
+        }
+    except Exception as e:
+        return {"error": "Failed to check DHW status.", "details": str(e)}
+
+
+@mcp.tool()
 def get_weather(station_id: str = "IROGOZ2") -> Dict[str, Any]:
     """Get current weather conditions from Weather Underground station."""
     try:
