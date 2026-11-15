@@ -70,7 +70,7 @@ process_data <- function(df_raw) {
   dt <- dt[rowSums(is.na(dt)) < (ncol(dt) - 1), ]
   
   # Calculate buffer energy and deltas
-  dt$WABT <- (bufor_bottom * 52 + bufor_mid2*37 + bufor_mid1 * 34 + bufor_top * 46) / 169
+  dt$WABT <- (dt$bufor_bottom * 52 + dt$bufor_mid2*37 + dt$bufor_mid1 * 34 + dt$bufor_top * 46) / 169
 
 dt$WABT <- ifelse(dt$WABT < 10 , NA, dt$WABT)
 dt <- dt %>% filter(!is.na(WABT) & WABT > 10 )
@@ -219,4 +219,51 @@ plot_heating_curve <- function(dt) {
     geom_point() + scale_color_viridis_c() +
     theme(axis.text.x = element_text(angle = 70, hjust = 1))
   plotly::ggplotly(krzywe)
+}
+
+calculate_wood_needed <- function(Q_buf, temp_ext, temp_co, wabt_target = 70.0) {
+  # Safe buffer target energy (WABT = 70.0 C to avoid boiler boiling/overheating)
+  # 600L buffer enthalpy at 70C: ~293.12 kJ/kg, Q_buf = (600 * 293.12 * 0.277 / 1000) - 17.43 = 31.29 kWh
+  enth_target <- IAPWS95::hTp(273.15 + wabt_target, 0.1)
+  q_target <- (600 * enth_target * 0.277 / 1000) - 17.43
+  
+  delta_q_buf <- max(0, q_target - Q_buf)
+  
+  if (delta_q_buf <= 0) {
+    return(0.0)
+  }
+  
+  # Heat demand of the house: P_house = max(0, 3.4085 - 0.1228 * temp_ext) [kW]
+  if (is.na(temp_ext) || temp_ext >= 16.0) {
+    p_house <- 0
+  } else {
+    p_house <- max(0, 3.4085 - 0.1228 * temp_ext)
+  }
+  
+  # Dry beech active burn duration: ~2.0 hours
+  q_house_burn <- p_house * 2.0
+  
+  # Network heat-up for 200 liters of water from cold start to target T_co
+  # Heating curve: T_co_target = 35.03 - 0.604 * temp_ext
+  if (!is.na(temp_ext)) {
+    t_co_target <- 35.03 - 0.604 * temp_ext
+  } else {
+    t_co_target <- 32.0
+  }
+  
+  if (!is.na(temp_co) && temp_co < t_co_target) {
+    # 200L * 4.186 kJ/(kg*K) / 3600 = 0.2326 kWh/K
+    q_network <- 0.2326 * (t_co_target - temp_co)
+  } else {
+    q_network <- 0
+  }
+  
+  # Total energy needed: buffer deficit + house consumption + network heating
+  q_total <- delta_q_buf + q_house_burn + q_network
+  
+  # Dry beech effective heat yield to water:
+  # Heating value = 4.15 kWh/kg, gasification boiler efficiency = 88% -> 3.65 kWh/kg
+  wood_kg <- q_total / 3.65
+  
+  return(round(wood_kg, 1))
 }

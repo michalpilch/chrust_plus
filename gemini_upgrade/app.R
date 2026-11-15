@@ -2,14 +2,6 @@ library(shiny)
 library(flexdashboard)
 library(plotly)
 library(dplyr)
-library(h2o)
-
-# Initialize H2O
-h2o.init()
-
-# Load the H2O model
-model_path <- "/home/dsl/gemini/chrust_plus/gemini_upgrade/GBM_model_R_1758988233368_1"
-model <- h2o.loadModel(model_path)
 
 # Source the functions script globally so plotting functions are available
 source("/home/dsl/gemini/chrust_plus/gemini_upgrade/functions.R")
@@ -112,11 +104,14 @@ server <- function(input, output) {
   output$wood_needed_text_large <- renderUI({
     latest_data_point <- latest_data_point_reactive()
     
-    latest_data_h2o <- as.h2o(latest_data_point)
-    prediction <- h2o.predict(model, latest_data_h2o)
-    wood_needed <- as.data.frame(prediction)$predict
+    wood_needed <- calculate_wood_needed(
+      Q_buf = latest_data_point$Q_buf,
+      temp_ext = latest_data_point$temp,
+      temp_co = latest_data_point$temp_co,
+      wabt_target = 70.0
+    )
     
-    HTML(paste0("<span style='font-size: 24px;'>Sugerowana ilość drewna: ", round(wood_needed, 2), " kg</span>"))
+    HTML(paste0("<span style='font-size: 24px;'>Sugerowana ilość drewna: ", round(wood_needed, 1), " kg</span>"))
   })
   
 }

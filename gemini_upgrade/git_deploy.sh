@@ -17,8 +17,11 @@ if ! git diff --cached --exit-code --quiet; then
   }
   git commit -m "Auto-update flexdashboard $(timestamp)"
 
+  # Pull rebase before pushing to stay in sync
+  GIT_SSH_COMMAND="ssh" git pull --rebase origin main
+
   # Push the changes to main. This will trigger the GitHub Action.
-  git push origin main
+  GIT_SSH_COMMAND="ssh" git push origin main
 else
   echo "No changes detected in index.html or app_flex.Rmd. Skipping commit and push."
 fi

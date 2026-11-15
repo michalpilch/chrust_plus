@@ -11,21 +11,12 @@ output:
 library(flexdashboard)
 library(plotly)
 library(dplyr)
-library(h2o)
 library(feather)
 library(rmarkdown) # Ensure rmarkdown is loaded for rendering
 library(htmltools) # Add htmltools for the HTML() function
 
-
-# Source the functions script globally so plotting functions are available
+# Source the functions script globally so plotting and calculation functions are available
 source("functions.R")
-
-# Initialize H2O
-h2o.init()
-
-# Load the H2O model
-model_path <- "GBM_model_R_1758988233368_1"
-model <- h2o.loadModel(model_path)
 
 # Load the processed data
 data_file <- "ml_model_data_for_app.feather"
@@ -39,32 +30,19 @@ if (nrow(dt) == 0) {
   stop("No data available from ml_model_data_for_app.feather")
 }
 
-# Reactive expression for the latest data point, ensuring it's not empty and has required columns
-# This logic is adapted from app.R for static rendering
+# Latest data point
 latest_data_point <- dt[nrow(dt), ]
 
-# Ensure all predictors are present and handle NAs for prediction
-predictors <- c("temp_home", "temp", "temp_piec", "temp_co", "bufor_top", "bufor_mid1", "bufor_mid2", "bufor_bottom", "WABT", "heating_cycle", "discharging_cycle", "heat_demand_kwh", "temp_lag1", "heat_demand_kwh_lag1")
-
-# Check if all predictors exist in latest_data_point
-if (!all(predictors %in% colnames(latest_data_point))) {
-  stop("Missing predictors in latest data point for H2O prediction.")
-}
-
-# Replace NAs in predictors with 0 or a reasonable default for prediction
-for (p in predictors) {
-  if (is.na(latest_data_point[[p]])) {
-    latest_data_point[[p]] <- 0 # Basic imputation: replace NA with 0
-  }
-}
-
-# H2O Prediction
-latest_data_h2o <- as.h2o(latest_data_point)
-prediction <- h2o.predict(model, latest_data_h2o)
-wood_needed <- as.data.frame(prediction)$predict
-
-# Disconnect H2O
-h2o.shutdown(prompt = FALSE)
+# Calibrated physical wood calculation:
+# Target WABT = 70.0 C (safe upper limit)
+# Fuel: Dry beech (suchy buk)
+# Network: 200 L distribution volume
+wood_needed <- calculate_wood_needed(
+  Q_buf = latest_data_point$Q_buf,
+  temp_ext = latest_data_point$temp,
+  temp_co = latest_data_point$temp_co,
+  wabt_target = 70.0
+)
 ```
 
 #### Sugerowana ilość drewna
