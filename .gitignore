@@ -19,6 +19,8 @@
 !/gemini_upgrade/git_deploy.sh
 !/gemini_upgrade/update_data.sh
 !/gemini_upgrade/sync_domoticz_to_bigquery.py
+!/gemini_upgrade/cloud_mcp/
+!/gemini_upgrade/cloud_mcp/*
 
 # Allow the .github directory for workflows
 !/.github/
