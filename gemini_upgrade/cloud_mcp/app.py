@@ -26,7 +26,7 @@ st.set_page_config(
 
 # Load Gemini API Key
 KEY_ENV_FILE = "/home/dsl/.config/gcp/gemini.env"
-if os.path.exists(KEY_ENV_FILE):
+if "GEMINI_API_KEY" not in os.environ and os.path.exists(KEY_ENV_FILE):
     with open(KEY_ENV_FILE) as f:
         for line in f:
             if line.startswith("GEMINI_API_KEY="):

@@ -10,7 +10,23 @@ from typing import Any, Dict, List, Optional
 import requests
 from google.cloud import bigquery, secretmanager
 from google.oauth2 import service_account
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except (ImportError, ModuleNotFoundError):
+    try:
+        from mcp.server.mcpserver import MCPServer as FastMCP
+    except (ImportError, ModuleNotFoundError):
+        class FastMCP:
+            def __init__(self, name):
+                self.name = name
+
+            def tool(self):
+                def decorator(f):
+                    return f
+                return decorator
+
+            def run(self):
+                pass
 
 # ============================================================
 # Configuration
